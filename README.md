@@ -1,139 +1,257 @@
-# 🎬 Netflix Streaming Platform — Microservices
+# 🎬 Netflix-Inspired Distributed Video Streaming Platform
 
-> ⚠️ **Recommended:** Watch the full video explanation before running the code — it will make much more sense!
->
-> ▶️ **Watch here:** [How Netflix Streams Video to 200 Million Users](https://youtube.com/@YeshendraDhaker)
->
-> ⭐ If this helped you, please **star this repo** and **subscribe to the channel!**
+A scalable, microservices-based video streaming platform inspired by Netflix that enables video upload, automated HLS encoding, adaptive bitrate streaming, and secure content delivery. The platform follows a distributed, event-driven architecture using Spring Boot microservices, Apache Kafka, Redis, AWS S3, Docker, and FFmpeg.
 
 ---
 
-## 📌 What We Built
+## 🚀 Features
 
-A complete **Netflix-like Video Streaming Platform** from scratch — production level code, not a basic tutorial.
+- 🎥 Upload and manage video content
+- ⚡ Event-driven communication using Apache Kafka
+- 🎞️ Automatic video transcoding with FFmpeg
+- 📺 Adaptive HLS streaming (1080p, 720p, 480p, 360p)
+- ☁️ Secure video storage using AWS S3
+- 🚀 High-performance caching with Redis
+- 🗄️ Persistent data storage using MySQL
+- 🐳 Dockerized microservices using Docker Compose
+- 🌐 Netflix-inspired frontend built with HTML, CSS, Vanilla JavaScript, and HLS.js
+- 🔗 RESTful APIs for content management and adaptive video streaming
 
-```
-You upload a video → FFmpeg encodes to 4 qualities automatically
-                   → HLS chunks stored on AWS S3
-                   → Streaming Service generates secure signed URLs
-                   → Custom HLS Player streams the video
+---
+
+# 🏗️ System Architecture
+
+```text
+                      Frontend
+       (HTML + CSS + JavaScript + HLS.js)
+                          │
+                     REST APIs
+                          │
+                 Streaming Service
+                          │
+              ┌───────────┴────────────┐
+              │                        │
+      Content Service          Video Service
+              │                        │
+              └───────────┬────────────┘
+                          │
+                   Apache Kafka
+                          │
+                 Encoding Service
+                          │
+                  FFmpeg (HLS Encoding)
+                          │
+                       AWS S3
+                          │
+                 MySQL + Redis Cache
 ```
 
 ---
 
-## 🏗️ Architecture
+# 🛠️ Tech Stack
 
-```
-Admin adds movie → Content Service → MySQL
+## Backend
+- Java 17
+- Spring Boot
+- Spring Web
+- Spring Data JPA
+- REST APIs
+- Maven
 
-Admin uploads video → Video Service → AWS S3
-                                         ↓
-                              Kafka (video.uploaded)
-                                         ↓
-                              Encoding Service
-                                         ↓
-                    FFmpeg → 1080p, 720p, 480p, 360p HLS chunks
-                                         ↓
-                              Upload encoded files → AWS S3
-                                         ↓
-                              Kafka (video.encoded)
-                                         ↓
-                    ┌──────────────────────────────────┐
-                    │                                  │
-             Content Service                  Streaming Service
-          updates HLS URL in MySQL          stores playlist key in Redis
-                                                     ↓
-User clicks play → Streaming Service → signs every HLS segment
-                                     → returns signed master.m3u8
-                                     → Custom player streams video ✅
-```
+## Distributed Systems
+- Apache Kafka
+- Redis
 
----
+## Database
+- MySQL
 
-## 🛠️ Services Overview
+## Cloud Storage
+- AWS S3
 
-| Service | Port | Responsibility |
-|---|---|---|
-| content-service | 8081 | Movie catalog — add movies, search, genres |
-| video-service | 8082 | Upload raw video to AWS S3 + publish Kafka event |
-| encoding-service | 8083 | FFmpeg — encode to 4 qualities + generate HLS |
-| streaming-service | 8084 | Generate signed URLs + serve HLS playlists |
+## Video Processing
+- FFmpeg
+- HLS Streaming
+
+## Frontend
+- HTML5
+- CSS3
+- Vanilla JavaScript
+- HLS.js
+
+## DevOps
+- Docker
+- Docker Compose
 
 ---
 
-## 🔧 Tech Stack
+# 📦 Microservices
 
-- **Spring Boot 3.2** — Microservices framework
-- **Apache Kafka** — Event streaming between services
-- **AWS S3** — Video storage (raw + encoded)
-- **FFmpeg** — Video encoding to multiple qualities
-- **Redis** — Streaming URL cache
-- **MySQL** — Movie catalog storage
-- **Docker + Docker Compose** — Infrastructure setup
-- **HLS.js** — Custom video player
+## 📁 Content Service
+
+Responsible for managing movie metadata.
+
+**Responsibilities**
+- Add, update and delete movies
+- Store movie metadata in MySQL
+- Expose REST APIs for movie management
 
 ---
 
-## 📋 Prerequisites
+## 🎥 Video Service
 
-Before running this project make sure you have:
+Handles video uploads.
 
-```
-✅ Java 17
-✅ Maven
-✅ Docker Desktop
-✅ FFmpeg installed
-✅ AWS Account with S3 bucket
-```
+**Responsibilities**
+- Upload MP4 videos
+- Store original videos in AWS S3
+- Publish `VideoUploadedEvent` to Apache Kafka
 
-### Install FFmpeg
+---
 
-**Windows:**
+## ⚙️ Encoding Service
+
+Processes uploaded videos.
+
+**Responsibilities**
+- Consume Kafka events
+- Encode videos using FFmpeg
+- Generate adaptive HLS playlists
+- Create 1080p, 720p, 480p and 360p video streams
+- Upload encoded videos to AWS S3
+- Publish `VideoEncodedEvent`
+
+---
+
+## ▶️ Streaming Service
+
+Provides secure video streaming.
+
+**Responsibilities**
+- Generate signed streaming URLs
+- Stream HLS playlists
+- Cache movie metadata using Redis
+- Deliver adaptive bitrate streaming
+
+---
+
+# 📺 Adaptive Streaming
+
+Every uploaded video is automatically converted into four HLS resolutions:
+
+- 1080p
+- 720p
+- 480p
+- 360p
+
+The HLS player automatically switches to the best quality depending on the user's network speed.
+
+---
+
+# 📋 Prerequisites
+
+Before running this project, make sure you have:
+
+- ✅ Java 17
+- ✅ Maven
+- ✅ Docker & Docker Compose
+- ✅ FFmpeg
+- ✅ AWS Account
+- ✅ AWS S3 Bucket
+
+---
+
+# 🎬 Install FFmpeg
+
+### Windows
+
 ```bash
 winget install ffmpeg
 ```
 
-**Mac:**
+### macOS
+
 ```bash
 brew install ffmpeg
 ```
 
-**Verify:**
+### Ubuntu
+
+```bash
+sudo apt install ffmpeg
+```
+
+Verify the installation:
+
 ```bash
 ffmpeg -version
 ```
 
 ---
 
-## ⚙️ AWS S3 Setup
+# ☁️ AWS S3 Setup
 
-### Step 1: Create S3 Bucket
+## Step 1: Create an S3 Bucket
+
+- Open AWS Console
+- Navigate to **S3**
+- Click **Create Bucket**
+- Example bucket name:
+
 ```
-AWS Console → S3 → Create Bucket
-Name: netflix-streaming-videos
-Region: your-region
+netflix-streaming-videos
 ```
 
-### Step 2: Block Public Access Settings
+Choose your preferred AWS region.
+
+---
+
+## Step 2: Configure Bucket Permissions
+
+Configure the bucket permissions according to your project requirements.
+
+---
+
+## Step 3: Create an IAM User
+
+- Go to **IAM → Users**
+- Create a new user
+
+Example:
+
 ```
-Permissions → Block public access
+netflix-app-user
 ```
 
-### Step 3: Create IAM User
-```
-IAM → Users → Create User
-Name: netflix-app-user
-Policy: AmazonS3FullAccess
-Create Access Key → Save both keys
+Assign S3 permissions and create an Access Key.
+
+Save:
+
+- Access Key ID
+- Secret Access Key
+
+---
+
+# 🚀 Getting Started
+
+## Clone Repository
+
+```bash
+git clone https://github.com/your-username/netflix-inspired-streaming-platform.git
+
+cd netflix-inspired-streaming-platform
 ```
 
 ---
 
-## 🚀 How To Run
+## Configure AWS Credentials
 
-### Step 1: Configure AWS credentials
+Update the following services:
 
-Update `application.yml` in video-service, encoding-service and streaming-service:
+- video-service
+- encoding-service
+- streaming-service
+
+`application.yml`
 
 ```yaml
 aws:
@@ -144,64 +262,100 @@ aws:
     bucket-name: YOUR_BUCKET_NAME
 ```
 
-### Step 2: Start Infrastructure
+---
+
+## Start Infrastructure
+
 ```bash
-docker-compose up -d
+docker compose up -d
 ```
 
-Wait 30 seconds for Kafka to fully initialize.
+This starts:
 
-### Step 3: Start All Services
+- MySQL
+- Redis
+- Apache Kafka
+- Zookeeper
 
-Open 4 separate terminals:
+Wait about **30 seconds** for Kafka to initialize.
+
+---
+
+## Start All Microservices
+
+### Terminal 1
 
 ```bash
-# Terminal 1
-cd content-service && mvn spring-boot:run
+cd content-service
+mvn spring-boot:run
+```
 
-# Terminal 2
-cd video-service && mvn spring-boot:run
+### Terminal 2
 
-# Terminal 3
-cd encoding-service && mvn spring-boot:run
+```bash
+cd video-service
+mvn spring-boot:run
+```
 
-# Terminal 4
-cd streaming-service && mvn spring-boot:run
+### Terminal 3
+
+```bash
+cd encoding-service
+mvn spring-boot:run
+```
+
+### Terminal 4
+
+```bash
+cd streaming-service
+mvn spring-boot:run
 ```
 
 ---
 
-## 🧪 Testing Flow
+# 🧪 Testing Flow
 
-### Step 1: Add a Movie
+## Step 1: Add a Movie
+
+**POST**
+
 ```
-POST http://localhost:8081/api/v1/movies
-Content-Type: application/json
+http://localhost:8081/api/v1/movies
+```
 
+```json
 {
-    "title": "Inception",
-    "description": "A mind bending thriller",
-    "genre": "SCI_FI",
-    "director": "Christopher Nolan",
-    "cast": "Leonardo DiCaprio",
-    "releaseYear": 2010,
-    "rating": 8.8,
-    "durationMinutes": 148
+  "title": "Pulp Fiction",
+  "description": "The lives of two mob hitmen, a boxer, a gangster and his wife, and a pair of diner bandits intertwine in four tales of violence and redemption.",
+  "genre": "CRIME",
+  "director": "Quentin Tarantino",
+  "cast": "John Travolta, Uma Thurman, Samuel L. Jackson",
+  "releaseYear": 1994,
+  "rating": 8.9,
+  "durationMinutes": 154
 }
 ```
 
-Copy the `id` from response.
+Copy the generated **movieId**.
 
-### Step 2: Upload Video
+---
+
+## Step 2: Upload Video
+
+**POST**
+
 ```
-POST http://localhost:8082/api/v1/videos/upload/{movieId}
-Content-Type: multipart/form-data
-file: [select any mp4 video]
+http://localhost:8082/api/v1/videos/upload/{movieId}
 ```
 
-### Step 3: Watch Encoding Service Logs
-```
-Consumed VideoUploadedEvent for movie: xxx
+Upload any MP4 file using **multipart/form-data**.
+
+---
+
+## Step 3: Monitor Encoding Logs
+
+```text
+Consumed VideoUploadedEvent
 Running FFmpeg for 1080p...
 Encoded 1080p successfully
 Running FFmpeg for 720p...
@@ -211,140 +365,132 @@ Encoded 480p successfully
 Running FFmpeg for 360p...
 Encoded 360p successfully
 Master playlist generated
-All encoded files uploaded to S3 ✅
-VideoEncodedEvent published ✅
+All encoded files uploaded to S3
+VideoEncodedEvent published
 ```
-
-### Step 4: Check Movie Status
-```
-GET http://localhost:8081/api/v1/movies/{movieId}
-```
-
-Response should show:
-```json
-{
-    "videoStatus": "READY",
-    "hlsUrl": "https://your-bucket.s3.region.amazonaws.com/encoded/movieId/master.m3u8"
-}
-```
-
-### Step 5: Get Streaming URL
-```
-GET http://localhost:8084/api/v1/stream/{movieId}
-```
-
-Response:
-```json
-{
-    "movieId": "xxx",
-    "streamingUrl": "https://your-bucket.s3.amazonaws.com/...",
-    "quality": "1080p, 720p, 480p, 360p",
-    "expiresInMinutes": 60
-}
-```
-
-### Step 6: Play Video
-1. Open `netflix-player.html` in Chrome
-2. Enter Movie ID
-3. Click Play
-4. Video streams in 1080p, 720p, 480p, 360p automatically ✅
 
 ---
 
-## 🎬 Custom Netflix Player
+## Step 4: Verify Movie Status
 
-We built a custom HLS player that:
-- Calls Streaming Service automatically
-- Signs every HLS segment individually
-- Supports adaptive bitrate — switches quality based on internet speed
-- Works with private S3 bucket
+**GET**
 
-> ⚠️ **Important:** Third party HLS players (like hls-js.netlify.app, LiveReacting) will NOT work because they cannot sign individual segment requests. Use our custom `player.html` only.
+```
+http://localhost:8081/api/v1/movies/{movieId}
+```
+
+Expected response:
+
+```json
+{
+  "videoStatus": "READY",
+  "hlsUrl": "https://your-bucket.s3.region.amazonaws.com/encoded/movieId/master.m3u8"
+}
+```
 
 ---
 
-## 📂 Project Structure
+## Step 5: Generate Streaming URL
+
+**GET**
 
 ```
-netflix-streaming-platform/
-├── content-service/          → Movie catalog
-├── video-service/            → S3 upload + Kafka
-├── encoding-service/         → FFmpeg + HLS
-├── streaming-service/        → Signed URLs + Redis
-├── player.html               → Custom HLS video player
-├── docker-compose.yml        → Infrastructure
+http://localhost:8084/api/v1/stream/{movieId}
+```
+
+Expected response:
+
+```json
+{
+  "movieId": "xxx",
+  "streamingUrl": "https://your-bucket.s3.amazonaws.com/...",
+  "quality": "1080p, 720p, 480p, 360p",
+  "expiresInMinutes": 60
+}
+```
+
+---
+
+## Step 6: Play Video
+
+1. Open **netflix-player.html**
+2. Enter the Movie ID
+3. Click **Play**
+4. Enjoy adaptive HLS video streaming.
+
+---
+
+# 📂 Project Structure
+
+```text
+netflix-inspired-streaming-platform/
+│
+├── content-service/          # Movie metadata management
+├── video-service/            # Video upload to AWS S3 & Kafka event publishing
+├── encoding-service/         # FFmpeg-based HLS encoding (1080p, 720p, 480p, 360p)
+├── streaming-service/        # Secure streaming, signed URLs & Redis caching
+├── frontend/
+│   └── netflix-player.html   # Netflix-inspired HLS video player
+├── docker-compose.yml        # MySQL, Redis, Kafka & Zookeeper
 └── README.md
 ```
 
 ---
 
-## 🔑 Kafka Topics
+# 🔌 REST APIs
 
-| Topic | Publisher | Consumer |
-|---|---|---|
-| video.uploaded | Video Service | Encoding Service, Content Service |
-| video.encoded | Encoding Service | Streaming Service, Content Service |
+## Content Service
 
----
-
-## 🔒 Security
-
-- **Private S3 bucket** — videos not publicly accessible
-- **Signed URLs** — every HLS segment signed individually
-- **URL expiry** — 60 minutes
-- **Raw videos** — completely private, only encoded folder accessible
+| Method | Endpoint | Description |
+|---------|----------|-------------|
+| GET | `/api/v1/movies` | Get all movies |
+| GET | `/api/v1/movies/{id}` | Get movie by ID |
+| POST | `/api/v1/movies` | Add a movie |
+| PUT | `/api/v1/movies/{id}` | Update movie |
+| DELETE | `/api/v1/movies/{id}` | Delete movie |
 
 ---
 
-## 📱 API Endpoints
+## Video Service
 
-### Content Service (8081)
-```
-POST   /api/v1/movies              → Add movie
-GET    /api/v1/movies              → Get all movies
-GET    /api/v1/movies/{id}         → Get movie by ID
-GET    /api/v1/movies/genre/{genre} → Get by genre
-GET    /api/v1/movies/search       → Search by title
-```
-
-### Video Service (8082)
-```
-POST   /api/v1/videos/upload/{movieId} → Upload video
-```
-
-### Streaming Service (8084)
-```
-GET    /api/v1/stream/{movieId}           → Get streaming URL
-GET    /api/v1/stream/{movieId}/playlist  → Get signed playlist
-```
+| Method | Endpoint | Description |
+|---------|----------|-------------|
+| POST | `/api/v1/videos/upload/{movieId}` | Upload video |
 
 ---
 
-## 🎯 Key Concepts Covered
+## Streaming Service
 
-- ✅ HLS — HTTP Live Streaming
-- ✅ FFmpeg video encoding to multiple qualities
-- ✅ AWS S3 presigned URLs
-- ✅ Adaptive bitrate streaming
-- ✅ Kafka event driven architecture
-- ✅ Redis caching for streaming URLs
-- ✅ Custom HLS proxy — signing every segment
+| Method | Endpoint | Description |
+|---------|----------|-------------|
+| GET | `/api/v1/stream/{movieId}` | Generate streaming URL |
+| GET | `/api/v1/stream/{movieId}/playlist` | Stream HLS playlist |
 
 ---
 
-## 📚 Full Microservices Series
+# 💡 Key Highlights
 
-| Project | Video | Source Code |
-|---|---|---|
-| Uber Clone | [Watch](https://youtu.be/Cdx4DF9N8d8) | [GitHub](https://github.com/YeshendraDhaker/Uber-App) |
-| Netflix Clone | [Watch](https://youtube.com/@YeshendraDhaker) | This repo |
-| Banking System | Coming Soon | Coming Soon |
+- Distributed Microservices Architecture
+- Event-Driven Communication using Apache Kafka
+- Adaptive HLS Video Streaming
+- FFmpeg Video Transcoding
+- Secure AWS S3 Integration
+- Redis Caching
+- Dockerized Deployment
+- Netflix-inspired Frontend
+- RESTful APIs
+- Scalable and Modular Design
 
 ---
 
-## 🤝 Connect
+# 👨‍💻 Author
 
-- **YouTube:** [YeshendraDhaker](https://youtube.com/@YeshendraDhaker)
-- **GitHub:** [yourusername](https://github.com/yourusername)
+**Rajesh Botla**
 
-> ⭐ Don't forget to **star this repo** and **subscribe** if this helped you!
+📧 Email: **rajeshbotla4@gmail.com**
+
+---
+
+## ⭐ Support
+
+If you found this project helpful, consider giving it a ⭐ on GitHub!
